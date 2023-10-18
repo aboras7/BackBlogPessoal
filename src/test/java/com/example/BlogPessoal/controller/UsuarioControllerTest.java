@@ -1,25 +1,27 @@
 package com.example.BlogPessoal.controller;
 
-import com.example.BlogPessoal.model.Usuario;
-import com.example.BlogPessoal.repository.UsuarioRepository;
-import com.example.BlogPessoal.service.UsuarioService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
+import com.example.BlogPessoal.model.Usuario;
+import com.example.BlogPessoal.repository.UsuarioRepository;
+import com.example.BlogPessoal.service.UsuarioService;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-@SpringBootTest
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UsuarioControllerTest {
 
@@ -33,25 +35,27 @@ public class UsuarioControllerTest {
 	private UsuarioRepository usuarioRepository;
 
 	@BeforeAll
-	void start() {
+	void start(){
 
 		usuarioRepository.deleteAll();
 
 		usuarioService.cadastrarUsuario(new Usuario(0L,
-				"Root", "root@root.com", "rootroot", " "));
+				"Root", "root@root.com", "rootroot", "-"));
+
 	}
 
 	@Test
-	@DisplayName("Cadastrar um usuário")
-	public void deveCriarUmUsuario () {
+	@DisplayName("Cadastrar Um Usuário")
+	public void deveCriarUmUsuario() {
 
-		HttpEntity<Usuario> corpoRequisicao = new HttpEntity<Usuario>(new Usuario (0L,
-				"Paulo Antunes", "paulo_antunes@email.com.br", "12345678", "-"));
+		HttpEntity<Usuario> corpoRequisicao = new HttpEntity<Usuario>(new Usuario(0L,
+				"Paulo Antunes", "paulo_antunes@email.com.br", "13465278", "-"));
 
 		ResponseEntity<Usuario> corpoResposta = testRestTemplate
 				.exchange("/usuarios/cadastrar", HttpMethod.POST, corpoRequisicao, Usuario.class);
 
 		assertEquals(HttpStatus.CREATED, corpoResposta.getStatusCode());
+
 	}
 
 	@Test
@@ -62,23 +66,23 @@ public class UsuarioControllerTest {
 				"Maria da Silva", "maria_silva@email.com.br", "13465278", "-"));
 
 		HttpEntity<Usuario> corpoRequisicao = new HttpEntity<Usuario>(new Usuario(0L,
-				"Maria da Silva", "mariaa_silva@email.com.br", "13465278", "-"));
+				"Maria da Silva", "maria_silva@email.com.br", "13465278", "-"));
 
 		ResponseEntity<Usuario> corpoResposta = testRestTemplate
-				.exchange("/usuario/cadastrar", HttpMethod.POST, corpoRequisicao, Usuario.class);
+				.exchange("/usuarios/cadastrar", HttpMethod.POST, corpoRequisicao, Usuario.class);
 
-		assertEquals(HttpStatus.CREATED, corpoResposta.getStatusCode());
+		assertEquals(HttpStatus.BAD_REQUEST, corpoResposta.getStatusCode());
 	}
 
 	@Test
-	@DisplayName("Atualizar um usuário")
+	@DisplayName("Atualizar um Usuário")
 	public void deveAtualizarUmUsuario() {
 
 		Optional<Usuario> usuarioCadastrado = usuarioService.cadastrarUsuario(new Usuario(0L,
 				"Juliana Andrews", "juliana_andrews@email.com.br", "juliana123", "-"));
 
 		Usuario usuarioUpdate = new Usuario(usuarioCadastrado.get().getId(),
-				"Juliana Andrews Ramos", "juliana_andrews@email.com.br", "juliana123", "-");
+				"Juliana Andrews Ramos", "juliana_ramos@email.com.br", "juliana123" , "-");
 
 		HttpEntity<Usuario> corpoRequisicao = new HttpEntity<Usuario>(usuarioUpdate);
 
@@ -87,10 +91,11 @@ public class UsuarioControllerTest {
 				.exchange("/usuarios/atualizar", HttpMethod.PUT, corpoRequisicao, Usuario.class);
 
 		assertEquals(HttpStatus.OK, corpoResposta.getStatusCode());
+
 	}
 
 	@Test
-	@DisplayName("Listar todos os usuários")
+	@DisplayName("Listar todos os Usuários")
 	public void deveMostrarTodosUsuarios() {
 
 		usuarioService.cadastrarUsuario(new Usuario(0L,
@@ -104,6 +109,7 @@ public class UsuarioControllerTest {
 				.exchange("/usuarios/all", HttpMethod.GET, null, String.class);
 
 		assertEquals(HttpStatus.OK, resposta.getStatusCode());
+
 	}
 
 }
